@@ -1,5 +1,7 @@
 import rfc822
 
+__all__ = ["deb_changes"]
+
 def line2dict(line):
     md5, size, section, priority, filename = line.split()
     return dict(md5=md5, size=size, section=section, priority=priority,
