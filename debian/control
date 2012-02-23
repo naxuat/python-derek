@@ -1,0 +1,12 @@
+Source: python-derek
+Section: python
+Priority: optional
+Maintainer: Dmitry Rozhkov <dmitry.rojkov@gmail.com>
+Build-Depends: debhelper (>= 7), python-support
+Standards-Version: 3.8.1
+
+Package: python-derek
+Architecture: all
+Depends: ${python:Depends}, ${misc:Depends}, python-restkit
+Description: python interface to Derek service
+ python interface to Derek service
