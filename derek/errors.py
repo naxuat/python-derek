@@ -1,3 +1,4 @@
+"""Derek errors."""
 
 __all__ = ["DerekError"]
 

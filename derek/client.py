@@ -1,12 +1,12 @@
+"""Derek client."""
+
 import logging
 import json
 
 from restkit import Resource, BasicAuth # TODO: OAuth
 
-from derek.parsers import deb_changes
 from derek.slice import Slice
 from derek.branch import Branch
-from derek.errors import DerekError
 
 __all__ = ["Client"]
 
@@ -62,7 +62,7 @@ class Client(object):
         """Download file."""
 
         resp = self.resource.get(path=path)
-        with self.resp.body_stream() as body:
+        with resp.body_stream() as body:
             with open(out, 'wb') as handle:
                 for block in body:
                     handle.write(block)
@@ -70,21 +70,21 @@ class Client(object):
     def upload(self, path, filepath):
         """Upload file to server."""
 
-        with open(filepath) as pf:
-            self.resource.post(path=path, payload=pf)
+        with open(filepath) as pfile:
+            self.resource.post(path=path, payload=pfile)
 
-    def branch(self, id):
+    def branch(self, branch_id):
         """Return Branch object."""
-        return Branch(self, id)
+        return Branch(self, branch_id)
 
-    def slice(self, id):
+    def slice(self, slice_id):
         """Return Slice object."""
-        return Slice(self, id)
+        return Slice(self, slice_id)
 
     def user(self, username):
         """Return User object."""
         raise NotImplementedError
 
-    def repo(self, id):
+    def repo(self, repo_id):
         """Return repository object."""
         raise NotImplementedError

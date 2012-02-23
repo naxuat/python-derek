@@ -1,7 +1,10 @@
+"""Derek branches."""
+
 import os
 import logging
 
 from derek.errors import DerekError
+from derek.parsers import deb_changes
 
 __all__ = ["BranchError", "Branch"]
 
@@ -14,22 +17,22 @@ class BranchError(DerekError):
 class Branch(object):
     """Repository branch."""
 
-    def __init__(self, client, id):
+    def __init__(self, client, branch_id):
         """Constructor."""
 
         self._client = client
-        self.id = id
+        self.branch_id = branch_id
         self._slice = None
         self._packages = None
         try:
-            self.username, self.reponame, self.name = id.split("/")
+            self.username, self.reponame, self.name = branch_id.split("/")
         except ValueError:
-            LOG.error("'%s' is incorrect value for branch id" % id)
-            raise BranchError("Incorrect branch ID '%s'" % id)
+            LOG.error("'%s' is incorrect value for branch id" % branch_id)
+            raise BranchError("Incorrect branch ID '%s'" % branch_id)
 
     def __str__(self):
         """Return string representation of the instance."""
-        return self.id
+        return self.branch_id
 
     def __repr__(self):
         """Return repr representation of the instance."""
@@ -43,7 +46,7 @@ class Branch(object):
             "reponame": self.reponame,
             "name":     self.name
         }
-        LOG.debug("Loading %s" % self.id)
+        LOG.debug("Loading %s" % self.branch_id)
         doc = self._client.getjson(path="/users/%(username)s/repos/%(reponame)s"
                                         "/branches/%(name)s" % context)
         LOG.debug("doc loaded: %r" % doc)
@@ -59,7 +62,7 @@ class Branch(object):
         """Fork branch."""
 
         context = {
-            "id":       self.id,
+            "id":       self.branch_id,
             "username": self.username,
             "reponame": self.reponame,
             "name":     self.name,
@@ -67,9 +70,10 @@ class Branch(object):
         }
         LOG.debug("Forking branch %(id)s to "
                   "%(username)s/%(reponame)s/%(new_name)s" % context)
-        resp = self._client.postjson(path="/users/%(username)s/repos/%(reponame)s/"
-                                          "branches/%(name)s/fork" % context,
-                                     payload={"new_branch": new_name})
+        self._client.postjson(path="/users/%(username)s/"
+                                   "repos/%(reponame)s/"
+                                   "branches/%(name)s/fork" % context,
+                              payload={"new_branch": new_name})
 
         return Branch(self._client, "%(username)s/%(reponame)s/%(new_name)s" %
                                      context)
@@ -105,7 +109,8 @@ class Branch(object):
         filepaths.extend(packages)
 
         # get upload token
-        resp = self._client.postjson(path="/users/%(username)s/repos/%(reponame)s/"
+        resp = self._client.postjson(path="/users/%(username)s/"
+                                          "repos/%(reponame)s/"
                                           "branches/%(name)s/get_upload_token" %
                                            context,
                                      payload={})
@@ -158,6 +163,7 @@ class Branch(object):
 
     @property
     def packages(self):
+        """Return current list of packages in the branch."""
 
         if self._packages:
             return self._packages
