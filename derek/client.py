@@ -4,6 +4,8 @@ import os
 
 from restkit import Resource, BasicAuth # TODO: OAuth
 
+from derek.parsers import deb_changes
+
 LOG = logging.getLogger(__name__)
 
 DEFAULT_PORT = 9000
@@ -101,8 +103,8 @@ class Branch(object):
             "name":     self.name
         }
         LOG.debug("Loading %s" % self.id)
-        doc = self._client.get(path="/users/%(username)s/repos/%(reponame)s/"
-                                    "branches/%(name)s" % context)
+        doc = self._client.getjson(path="/users/%(username)s/repos/%(reponame)s"
+                                        "/branches/%(name)s" % context)
         LOG.debug("doc loaded: %r" % doc)
         slice_id = "%(username)s/%(reponame)s/%(slice_id)s" % {
             "username": self.username,
@@ -124,9 +126,9 @@ class Branch(object):
         }
         LOG.debug("Forking branch %(id)s to "
                   "%(username)s/%(reponame)s/%(new_name)s" % context)
-        resp = self._client.post(path="/users/%(username)s/repos/%(reponame)s/"
-                                      "branches/%(name)s/fork" % context,
-                                 payload={"new_branch": new_name})
+        resp = self._client.postjson(path="/users/%(username)s/repos/%(reponame)s/"
+                                          "branches/%(name)s/fork" % context,
+                                     payload={"new_branch": new_name})
 
         return Branch(self._client, "%(username)s/%(reponame)s/%(new_name)s" %
                                      context)
@@ -143,13 +145,35 @@ class Branch(object):
             "name":     self.name
         }
         LOG.debug("Merging from %r to %r" % (branch, self))
-        self._client.post(path="/users/%(username)s/repos/%(reponame)s/"
-                               "branches/%(name)s/merge" % context,
-                                 payload={"from_branch": branch.name})
+        self._client.postjson(path="/users/%(username)s/repos/%(reponame)s/"
+                                   "branches/%(name)s/merge" % context,
+                              payload={"from_branch": branch.name})
 
     def upload_packages(self, packages):
         """Upload packages to branch."""
-        raise NotImplementedError
+
+        context = {
+            "username": self.username,
+            "reponame": self.reponame,
+            "name":     self.name
+        }
+
+        filepaths = [os.path.join(os.path.dirname(path), pfile['filename'])
+                     for path in packages
+                     for pfile in deb_changes(path)['files']]
+        filepaths.extend(packages)
+
+        # get upload token
+        resp = self._client.postjson(path="/users/%(username)s/repos/%(reponame)s/"
+                                          "branches/%(name)s/get_upload_token" %
+                                           context,
+                                     payload={})
+        token = resp['utoken']
+        for pfile in filepaths:
+            self._client.upload(path="/upload/%s/send/%s" %
+                                      (token, os.path.basename(pfile)),
+                                filepath=pfile)
+        self._client.resource.post(path="/upload/%s/dput" % token)
 
     def download_package(self, name, version, outdir):
         """Download package files."""
@@ -163,7 +187,7 @@ class Branch(object):
                     return "%(name)s/%(version)s/%(id)s" % pinfo
             raise DerekError("No package %s %s in the branch" % (name, version))
 
-        pkg = self._client.get(path="/packages/%s" %
+        pkg = self._client.getjson(path="/packages/%s" %
                                     get_pkg_id(self.packages, name, version))
         for pfile in pkg['files']:
             self._client.download(path="/users/%(username)s/repos/%(reponame)s/"
@@ -178,6 +202,7 @@ class Branch(object):
                                            "filename": pfile["name"]
                                        },
                                   out=os.path.join(outdir, pfile["name"]))
+        LOG.debug("Package download complete")
 
     @property
     def slice(self):
@@ -202,6 +227,10 @@ class Branch(object):
 def dict2qs(dictionary):
     """Convert dictionary to query string."""
 
+    # don't touch non-dictionaries
+    if not isinstance(dictionary, dict):
+        return dictionary
+
     chunks = ["%s=%s" % (key, value) for key, value in dictionary.items()]
     return "&".join(chunks)
 
@@ -213,54 +242,45 @@ class Client(object):
         """Constructor."""
 
         auth = BasicAuth(username, password)
-        self._res = Resource("http://%s:%d" % (host, port), filters=[auth])
+        self.resource = Resource("http://%s:%d" % (host, port), filters=[auth])
 
-    def _check_response(self, response):
-        """Check that server replied correctly."""
-
-        LOG.debug("checking response")
-        if response.status_int == 200:
-            LOG.debug("Response is OK")
-            return response
-        elif response.status_int == 401:
-            raise DerekError("Unauthorized access")
-        elif reponse.status_int == 403:
-            raise DerekError("Forbidden")
-        else:
-            raise DerekError("Server error: %d %s" % (response.status_int,
-                                                      response.body_string()))
-
-    def post(self, path, payload):
-        """Do POST request to Derek."""
+    def postjson(self, path, payload):
+        """Do POST request to Derek and expect JSON in response."""
 
         headers = {
                       'accept': 'application/json',
                       'content-type': 'application/x-www-form-urlencoded'
                   }
 
-        resp = self._res.post(path=path,
-                              payload=dict2qs(payload),
-                              headers=headers)
-        return json.loads(self._check_response(resp).body_string())
+        resp = self.resource.post(path=path,
+                                  payload=dict2qs(payload),
+                                  headers=headers)
+        return json.loads(resp.body_string())
 
-    def get(self, path, params=None):
-        """Do GET request to Derek."""
+    def getjson(self, path, params=None):
+        """Do GET request to Derek and expect JSON in response."""
 
         if params is None:
             params = {}
 
         headers = {'accept': 'application/json'}
-        resp = self._res.get(path=path, headers=headers, **params)
-        return json.loads(self._check_response(resp).body_string())
+        resp = self.resource.get(path=path, headers=headers, **params)
+        return json.loads(resp.body_string())
 
     def download(self, path, out):
         """Download file."""
 
-        resp = self._res.get(path=path)
-        with self._check_response(resp).body_stream() as body:
+        resp = self.resource.get(path=path)
+        with self.resp.body_stream() as body:
             with open(out, 'wb') as handle:
                 for block in body:
                     handle.write(block)
+
+    def upload(self, path, filepath):
+        """Upload file to server."""
+
+        with open(filepath) as pf:
+            self.resource.post(path=path, payload=pf)
 
     def branch(self, id):
         """Return Branch object."""
