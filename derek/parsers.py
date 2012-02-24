@@ -1,6 +1,6 @@
 """Parsing functions."""
 
-import rfc822
+from email import message_from_file
 
 __all__ = ["deb_changes"]
 
@@ -26,6 +26,6 @@ def deb_changes(filepath):
             chg_fd.readline() # empty line
         if not chg_fd.readline().find('Format') != -1:
             chg_fd.readline()
-        changes = rfc822.Message(chg_fd)
+        changes = message_from_file(chg_fd)
     return dict(files=[line2dict(line)
-                       for line in changes.dict['files'].splitlines()])
+                       for line in changes.get('files').splitlines()])
