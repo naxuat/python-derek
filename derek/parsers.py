@@ -27,5 +27,5 @@ def deb_changes(filepath):
         if not chg_fd.readline().find('Format') != -1:
             chg_fd.readline()
         changes = rfc822.Message(chg_fd)
-        return dict(files=[line2dict(line)
-                           for line in changes.dict['files'].splitlines()])
+    return dict(files=[line2dict(line)
+                       for line in changes.dict['files'].splitlines()])
