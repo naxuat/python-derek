@@ -119,7 +119,7 @@ class Branch(object):
             self._client.upload(path="/upload/%s/send/%s" %
                                       (token, os.path.basename(pfile)),
                                 filepath=pfile)
-        self._client.resource.post(path="/upload/%s/dput" % token)
+        self._client.post(path="/upload/%s/dput" % token)
 
     def download_package(self, name, version, outdir):
         """Download package files."""

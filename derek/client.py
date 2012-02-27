@@ -37,8 +37,11 @@ class Client(object):
         auth = BasicAuth(username, password)
         self.resource = Resource("http://%s:%d" % (host, port), filters=[auth])
 
-    def post(self, path, payload):
+    def post(self, path, payload = None):
         """Do POST request to Derek."""
+
+        if payload is None:
+            payload = {}
 
         headers = {
                       'content-type': 'application/x-www-form-urlencoded'
