@@ -7,6 +7,8 @@ from restkit import Resource, BasicAuth # TODO: OAuth
 
 from derek.slice import Slice
 from derek.branch import Branch
+from derek.user import User
+from derek.repo import Repo
 
 __all__ = ["Client"]
 
@@ -34,6 +36,18 @@ class Client(object):
 
         auth = BasicAuth(username, password)
         self.resource = Resource("http://%s:%d" % (host, port), filters=[auth])
+
+    def post(self, path, payload):
+        """Do POST request to Derek."""
+
+        headers = {
+                      'content-type': 'application/x-www-form-urlencoded'
+                  }
+
+        resp = self.resource.post(path=path,
+                                  payload=dict2qs(payload),
+                                  headers=headers)
+        return resp
 
     def postjson(self, path, payload):
         """Do POST request to Derek and expect JSON in response."""
@@ -83,8 +97,8 @@ class Client(object):
 
     def user(self, username):
         """Return User object."""
-        raise NotImplementedError
+        return User(self, username)
 
     def repo(self, repo_id):
         """Return repository object."""
-        raise NotImplementedError
+        return Repo(self, repo_id)
