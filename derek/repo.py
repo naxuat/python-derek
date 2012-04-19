@@ -1,6 +1,9 @@
-from derek.errors import DerekError
+import logging
+from derek.errors import DerekError, ResourceNotFound
 
 __all__ = ["Repo", "RepoError"]
+
+LOG = logging.getLogger(__name__)
 
 class RepoError(DerekError):
     pass
@@ -27,8 +30,42 @@ class Repo(object):
         """Return repr representation of the instance."""
         return "<Repo: %s>" % self
 
+    def _load(self):
+        """Loads repo data from Derek."""
+
+        context = {
+            "username": self.username,
+            "reponame": self.reponame
+        }
+        LOG.debug("Loading %s" % self.repo_id)
+        self._repo_doc = self._client.getjson(
+                        path="/users/%(username)s/repos/%(reponame)s" % context)
+        LOG.debug("doc loaded: %r" % self._repo_doc)
+
+    @property
+    def _doc(self):
+        """Return repo doc."""
+
+        if self._repo_doc is None:
+            self._load()
+        return self._repo_doc
+
+    def exists(self):
+        """Check if repo exists in Derek."""
+
+        try:
+            self._load()
+        except ResourceNotFound:
+            return False
+
+        return True
+
     @property
     def branches(self):
         """Return lists of Branch instances."""
-        raise NotImplementedError
+
+        if self._repo_doc is None:
+            self._load()
+        return [self._client.branch("%s/%s" % (self.repo_id, bname))
+                for bname in self._doc["branches"]]
 

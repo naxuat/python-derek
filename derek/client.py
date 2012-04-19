@@ -4,6 +4,7 @@ import logging
 import json
 
 from restkit import Resource, BasicAuth # TODO: OAuth
+from restkit import ResourceNotFound, Unauthorized, RequestFailed
 
 from derek.slice import Slice
 from derek.branch import Branch
