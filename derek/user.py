@@ -38,11 +38,18 @@ class User(object):
         return [self._client.repo("%s/%s" % (self.username, repo_id))
                 for repo_id in self._doc["repos"]]
 
-    def add_repo(self, name, repo_type = "deb"):
+    def add_repo(self, name, repo_type = "deb", archs=None):
         """Add new repository."""
+
+        if archs is None:
+            archs = ["i386"]
+        assert isinstance(archs, list)
+
+        archs_str = " ".join(archs)
         self._client.post("/users/%s/addrepo" % self.username,
                           {
                               "reponame": name,
-                              "type":     repo_type
+                              "type":     repo_type,
+                              "archs":    archs_str
                           })
         self.reset_cache()
