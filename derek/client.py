@@ -10,13 +10,11 @@ from derek.slice import Slice
 from derek.branch import Branch
 from derek.user import User
 from derek.repo import Repo
+from derek.defaults import DEFAULT_PORT, DEFAULT_HOST
 
 __all__ = ["Client"]
 
 LOG = logging.getLogger(__name__)
-
-DEFAULT_PORT = 9000
-DEFAULT_HOST = "localhost"
 
 def dict2qs(dictionary):
     """Convert dictionary to query string."""
