@@ -14,6 +14,11 @@ setup(
     license="GPL",
     keywords="derek",
     packages=['derek'],
+    entry_points={
+        'console_scripts': [
+            'drk=derek.cli:main'
+        ]
+    },
     long_description=read('README.rst'),
     classifiers=[
         "Development Status :: 3 - Alpha",
