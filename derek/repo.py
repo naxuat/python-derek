@@ -1,5 +1,9 @@
 import logging
+
 from derek.errors import DerekError, ResourceNotFound
+from derek.cli_registry import Argument, command
+
+from derek.defaults import REPO_DOC
 
 __all__ = ["Repo", "RepoError"]
 
@@ -69,3 +73,41 @@ class Repo(object):
         return [self._client.branch("%s/%s" % (self.repo_id, bname))
                 for bname in self._doc["branches"]]
 
+@command([
+])
+def repo(env):
+    "show various information about repository"
+
+@command([
+    Argument('-a', '--alias', help='add an alias after creation'),
+    Argument('-A', '--force-alias', action='store_true',
+                help='overwrite the existing alias'),
+    Argument('-t', '--type', default='deb',
+                help='repository type (default: %(default)s)'),
+    Argument('repo', help=REPO_DOC)
+])
+def create(env):
+    """create a new repository"""
+
+@command([
+#            {"repo", REPO_DOC
+#            {"branch", "new branch name"}
+])
+def branch(env):
+    "create a new branch"
+
+@command([
+#       {list, $l, "list", undefined, "list defined aliases"},
+#       {add, $a, "add", string, "add an alias (<add> -- an alias to add)"},
+#       {delete, $d, "delete", undefined, "delete an alias"},
+#       {force, $f, "force", undefined, "force overwriting an existing alias"}
+])
+def alias(env):
+    "manage repository aliases"
+
+@command([
+#           {"repo", REPO_DOC
+#           {"branch", "branch name to merge from"}
+])
+def merge(env):
+    "perform a merge"

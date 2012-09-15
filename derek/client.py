@@ -10,6 +10,8 @@ from derek.slice import Slice
 from derek.branch import Branch
 from derek.user import User
 from derek.repo import Repo
+from derek.cli_registry import Argument, command
+
 from derek.defaults import DEFAULT_PORT, DEFAULT_HOST
 
 __all__ = ["Client"]
@@ -104,3 +106,12 @@ class Client(object):
     def repo(self, repo_id):
         """Return repository object."""
         return Repo(self, repo_id)
+
+@command([
+    Argument('-f', '--force', help='force overwriting existing credentials')
+])
+def login(env):
+    """
+    get access token from the server
+    """
+    print 'Login:', env
