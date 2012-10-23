@@ -31,3 +31,10 @@ def upload(_env):
 ], name='import')
 def do_import(_env):
     "import an existing repository"
+
+@command([
+], name='download')
+def download(_env):
+    """
+    download package(s)
+    """
