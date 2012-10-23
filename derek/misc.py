@@ -29,5 +29,5 @@ def upload(_env):
 #       {arch, $a, "arch", {string, default},
 #       "architecture (default: " ?DEFAULT_ARCH ")"}
 ], name='import')
-def do_import(env):
+def do_import(_env):
     "import an existing repository"
