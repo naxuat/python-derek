@@ -4,3 +4,4 @@ drk
 python_derek.egg-info
 build/
 dist/
+docs/.build/
