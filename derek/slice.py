@@ -1,12 +1,11 @@
 """Derek slices."""
 
 import logging
+LOG = logging.getLogger(__name__)
 
 from derek.errors import DerekError
 
 __all__ = ["SliceError", "Slice"]
-
-LOG = logging.getLogger(__name__)
 
 class SliceError(DerekError):
     """Slice error."""

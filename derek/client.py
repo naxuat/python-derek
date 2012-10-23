@@ -1,6 +1,8 @@
 """Derek client."""
 
 import logging
+LOG = logging.getLogger(__name__)
+
 import json
 
 from restkit import Resource, BasicAuth # TODO: OAuth
@@ -15,8 +17,6 @@ from derek.cli_registry import Argument, command
 from derek.defaults import DEFAULT_PORT, DEFAULT_HOST
 
 __all__ = ["Client"]
-
-LOG = logging.getLogger(__name__)
 
 def dict2qs(dictionary):
     """Convert dictionary to query string."""

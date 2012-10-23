@@ -1,14 +1,14 @@
 """Derek branches."""
 
-import os
 import logging
+LOG = logging.getLogger(__name__)
+
+import os
 
 from derek.errors import DerekError
 from derek.parsers import deb_changes
 
 __all__ = ["BranchError", "Branch"]
-
-LOG = logging.getLogger(__name__)
 
 class BranchError(DerekError):
     """Branch error."""

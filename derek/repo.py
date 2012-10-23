@@ -1,4 +1,5 @@
 import logging
+LOG = logging.getLogger(__name__)
 
 from derek.errors import DerekError, ResourceNotFound
 from derek.cli_registry import Argument, command
@@ -6,8 +7,6 @@ from derek.cli_registry import Argument, command
 from derek.defaults import REPO_DOC
 
 __all__ = ["Repo", "RepoError"]
-
-LOG = logging.getLogger(__name__)
 
 class RepoError(DerekError):
     pass
