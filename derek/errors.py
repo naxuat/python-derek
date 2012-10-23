@@ -7,4 +7,3 @@ __all__ = ["DerekError", "ResourceNotFound", "Unauthorized", "RequestFailed"]
 class DerekError(Exception):
     """Derek error."""
     pass
-
