@@ -11,7 +11,6 @@ setup(
     author="Dmitry Rozhkov",
     author_email="dmitry.rojkov@gmail.com",
     description="Python client for Derek",
-    license="GPL",
     keywords="derek",
     packages=['derek'],
     entry_points={
@@ -23,6 +22,6 @@ setup(
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Topic :: Utilities",
-        "License :: OSI Approved :: GPL License",
+        "License :: OSI Approved :: Apache Software License"
     ]
 )
