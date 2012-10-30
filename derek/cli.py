@@ -6,10 +6,11 @@ import sys
 
 from argparse import ArgumentParser
 
-# import these to initialize CLI registry
+# {{{ import these to initialize CLI registry
 import derek.client
 import derek.repo
 import derek.misc
+# }}}
 
 from derek.cli_registry import add_parsers
 from derek.defaults import DEFAULT_CONFDIR
