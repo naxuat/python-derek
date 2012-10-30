@@ -43,7 +43,11 @@ class _CommandRegistry(object):
         """
         ...
         """
-        name = kwargs.get('name', func.__name__)
+        if 'name' in kwargs:
+            name = kwargs['name']
+            del kwargs['name']
+        else:
+            name = func.__name__
 
         if name in _CommandRegistry._commands:
             raise DerekError('Command %s is already defined' % name)
@@ -58,7 +62,10 @@ class _CommandRegistry(object):
         for name in sorted(_CommandRegistry._commands.keys()):
             func, args, kwargs = _CommandRegistry._commands[name]
 
-            parser = subp.add_parser(name, help=_firstline(func))
+            if 'help' not in kwargs:
+                kwargs['help'] = _firstline(func)
+
+            parser = subp.add_parser(name, **kwargs)
 
             for arg in args:
                 arg.add(parser)
