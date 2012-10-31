@@ -52,8 +52,11 @@ class Client(object):
                                   headers=headers)
         return resp
 
-    def postjson(self, path, payload):
+    def postjson(self, path, payload=None):
         """Do POST request to Derek and expect JSON in response."""
+
+        if payload is None:
+            payload = {}
 
         headers = {
                       'accept': 'application/json',

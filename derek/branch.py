@@ -112,8 +112,7 @@ class Branch(object):
         resp = self._client.postjson(path="/users/%(username)s/"
                                           "repos/%(reponame)s/"
                                           "branches/%(name)s/get_upload_token" %
-                                           context,
-                                     payload={})
+                                           context)
         token = resp['utoken']
         for pfile in filepaths:
             self._client.upload(path="/upload/%s/send/%s" %
