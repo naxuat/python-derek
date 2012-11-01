@@ -26,11 +26,17 @@ setup(
     author="Dmitry Rozhkov",
     author_email="dmitry.rojkov@gmail.com",
     description="Python client for Derek",
+    url='https://github.com/naxuat/python-derek',
     keywords="derek",
     packages=['derek'],
     entry_points={
         'console_scripts': [
             'drk=derek.cli:main'
+        ],
+        'derek.commands': [
+            'core.repo=derek.repo',
+            'core.misc=derek.misc',
+            'core.client=derek.misc'
         ]
     },
     long_description=read('README.rst'),
